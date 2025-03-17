@@ -24,7 +24,7 @@ def test_cmmt(model, test_loader, device, config):
 
     with torch.no_grad():
         start_time = time.time()
-        for data, target, make_target, type_target in test_loader:
+        for data, target, make_target, type_target, color_target in test_loader:
             data = data.to(device)
             target = target.to(device)
             make_target = make_target.to(device)
@@ -38,7 +38,7 @@ def test_cmmt(model, test_loader, device, config):
             loss_type = F.cross_entropy(type_pred, type_target)
             loss_color = F.cross_entropy(color_pred, color_target)
 
-            loss = loss_main + config['make_loss'] * loss_make + config['type_loss'] * loss_type
+            loss = loss_main + config['make_loss'] * loss_make + config['type_loss'] * loss_type + config['color_loss'] * loss_color
 
             acc = pred.max(1)[1].eq(target).float().sum()
             make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
@@ -223,6 +223,10 @@ def main(args):
     model = model.to(device)
 
     train_loader, test_loader = data_process.prepare_loader(config)
+    for batch in test_loader:
+        print(f"Test loader batch length: {len(batch)}")
+        print(f"Batch contents: {[x.shape if hasattr(x, 'shape') else x for x in batch]}")
+        break
 
     if config['version'] == 1:
         test_fn = test_v1

@@ -258,34 +258,21 @@ def main(args):
     num_types = len(info['model_type'].unique())
     num_colors = 9
 
-    # Construct the model
     model = network.construct_model(config, num_classes, num_makes, num_types, num_colors)
+    model = model.to(device)
 
-    # Move model to GPU and enable multi-GPU if available
-    if torch.cuda.is_available():
-        model = model.to(device)
-        if torch.cuda.device_count() > 1:
-            print(f"Using {torch.cuda.device_count()} GPUs!")
-            model = nn.DataParallel(model)  # Wrap the model for multi-GPU training
-    else:
-        model = model.to(device)  # Single CPU or single GPU
-
-    # Optimizer remains the same, using the wrapped model's parameters
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
                           momentum=config['momentum'],
                           weight_decay=config['weight_decay'])
 
-    lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
-                                                  [100, 150],
-                                                  gamma=0.1)
+    lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [100, 150], gamma=0.1)
 
     train_loader, test_loader = data_process.prepare_loader(config, transform_T=1,
                                                             train_annopath='/kaggle/input/car-model-make-cartype-color/data/devkit/cmmt_train.csv',
                                                             test_annopath='/kaggle/input/car-model-make-cartype-color/data/devkit/cmmt_test.csv',
                                                             train_imgdir='/kaggle/input/car-model-make-cartype-color/data/train_cropped',
-                                                            test_imgdir='/kaggle/input/car-model-make-cartype-color/data/train_cropped'
-                                                            )
+                                                            test_imgdir='/kaggle/input/car-model-make-cartype-color/data/test_cropped')
 
     best_acc = 0
     res = []
@@ -305,13 +292,9 @@ def main(args):
         val_res = test_fn(model, test_loader, device, config)
         train_res.update(val_res)
 
-        if best_acc < val_res['test_acc']:
-            best_acc = val_res['test_acc']
-            # Save the model state dict (unwrap if using DataParallel)
-            if isinstance(model, nn.DataParallel):
-                torch.save(model.module.state_dict(), exp_dir + '/best.pth')
-            else:
-                torch.save(model.state_dict(), exp_dir + '/best.pth')
+        if best_acc < val_res['val_acc']:  # Updated from 'test_acc' to 'val_acc'
+            best_acc = val_res['val_acc']
+            torch.save(model.state_dict(), exp_dir + '/best.pth')
 
         res.append(train_res)
     
