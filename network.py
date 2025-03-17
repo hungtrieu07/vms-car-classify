@@ -163,13 +163,13 @@ class FocalLoss(nn.Module):
     
 def construct_model(config, num_classes, num_makes, num_types, num_colors=None):
     if config['arch'] == 'resnext50':
-        base = torchvision.models.resnext50_32x4d(pretrained=True)
+        base = torchvision.models.resnext50_32x4d(weights=torchvision.models.ResNeXt50_32X4D_Weights.DEFAULT)
     elif config['arch'] == 'resnet34':
-        base = torchvision.models.resnet34(pretrained=True)
+        base = torchvision.models.resnet34(weights=torchvision.models.ResNet34_Weights.DEFAULT)
     elif config['arch'] == 'resnet101':
-        base = torchvision.models.resnext101_32x8d(pretrained=True)
+        base = torchvision.models.resnext101_32x8d(weights=torchvision.models.ResNeXt101_32X8D_Weights.DEFAULT)
     else:  # mobilenetv2
-        base = torchvision.models.mobilenet_v2(pretrained=True)
+        base = torchvision.models.mobilenet_v2(weights=torchvision.models.MobileNet_V2_Weights.DEFAULT)
 
     if config['version'] == 1:
         model = NetworkV1(base, num_classes)

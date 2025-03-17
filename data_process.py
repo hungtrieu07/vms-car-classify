@@ -5,6 +5,8 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
+num_workers = min(os.cpu_count(), 6)
+
 color_class_names = ['Black', 'Blue', 'Brown', 'Green', 'Orange', 'Red', 'Silver', 'White', 'Yellow']
 
 def load_class_names(path='/kaggle/input/car-model-make-cartype-color/data/devkit/class_names.csv'):
@@ -242,11 +244,11 @@ def prepare_loader(config, transform_T=1,
                               batch_size=config['batch_size'],
                               shuffle=True,
                               pin_memory=False,
-                              num_workers=12)
+                              num_workers=num_workers)
     test_loader = DataLoader(test_dataset,
                              batch_size=config['test_batch_size'],
                              shuffle=False,
                              pin_memory=False,
-                             num_workers=12)
+                             num_workers=num_workers)
 
     return train_loader, test_loader
