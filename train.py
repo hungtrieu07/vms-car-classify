@@ -245,7 +245,7 @@ def main(args):
         'version': args.version,
         'make_loss': args.make_loss,
         'type_loss': args.type_loss,
-        'color_loss': args.color_loss,	
+        'color_loss': args.color_loss,    
         'finetune': args.finetune,
         'path': args.path
     } 
@@ -258,9 +258,19 @@ def main(args):
     num_types = len(info['model_type'].unique())
     num_colors = 9
 
+    # Construct the model
     model = network.construct_model(config, num_classes, num_makes, num_types, num_colors)
-    model = model.to(device)
 
+    # Move model to GPU and enable multi-GPU if available
+    if torch.cuda.is_available():
+        model = model.to(device)
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs!")
+            model = nn.DataParallel(model)  # Wrap the model for multi-GPU training
+    else:
+        model = model.to(device)  # Single CPU or single GPU
+
+    # Optimizer remains the same, using the wrapped model's parameters
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
                           momentum=config['momentum'],
@@ -297,7 +307,11 @@ def main(args):
 
         if best_acc < val_res['test_acc']:
             best_acc = val_res['test_acc']
-            torch.save(model.state_dict(), exp_dir + '/best.pth')
+            # Save the model state dict (unwrap if using DataParallel)
+            if isinstance(model, nn.DataParallel):
+                torch.save(model.module.state_dict(), exp_dir + '/best.pth')
+            else:
+                torch.save(model.state_dict(), exp_dir + '/best.pth')
 
         res.append(train_res)
     
