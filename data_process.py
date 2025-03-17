@@ -7,7 +7,7 @@ from torchvision import transforms
 
 color_class_names = ['Black', 'Blue', 'Brown', 'Green', 'Orange', 'Red', 'Silver', 'White', 'Yellow']
 
-def load_class_names(path='data/devkit/class_names.csv'):
+def load_class_names(path='/kaggle/input/car-model-make-cartype-color/data/devkit/class_names.csv'):
     cn = pandas.read_csv(path, header=None).values.reshape(-1)
     cn = cn.tolist()
     return cn
