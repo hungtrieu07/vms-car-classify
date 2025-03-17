@@ -271,10 +271,10 @@ def main(args):
                                                   gamma=0.1)
 
     train_loader, test_loader = data_process.prepare_loader(config, transform_T=1,
-                                                            train_annopath='data/devkit/cmmt_train.csv',
-                                                            test_annopath='data/devkit/cmmt_test.csv',
-                                                            train_imgdir='data/train_cropped',
-                                                            test_imgdir='data/test_cropped'
+                                                            train_annopath='/kaggle/input/car-model-make-cartype-color/data/devkit/cmmt_train.csv',
+                                                            test_annopath='/kaggle/input/car-model-make-cartype-color/data/devkit/cmmt_test.csv',
+                                                            train_imgdir='/kaggle/input/car-model-make-cartype-color/data/train_cropped',
+                                                            test_imgdir='/kaggle/input/car-model-make-cartype-color/data/train_cropped'
                                                             )
 
     best_acc = 0
